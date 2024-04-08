@@ -42,17 +42,30 @@ pipeline {
 //                 '''
 //             }
 //         }
-//         stage('Run the image') {
-//             steps {
-//                 sh "IMAGE_TAG=${env.IMAGE_TAG} docker compose up -d hello mongo"
-//             }
-//         }
-        stage('Run E2E tests') {
+
+        stage('Install kubectl') {
             steps {
-                sh 'curl -i 172.16.5.4:27017'
-                sh './gradlew testE2E'
+                sh 'curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"'
+                sh 'ls -alh kubectl'
+                sh 'install -o jenkins -g jenkins -m 0755 kubectl /usr/local/bin/kubectl'
+                sh '''
+                    the_version=$(kubectl version)
+                    echo "version ${the_version} version"
+                    '''
             }
         }
+
+        stage('Run the image') {
+            steps {
+                sh 'kubectl apply -f hello.yaml'
+            }
+        }
+        // stage('Run E2E tests') {
+        //     steps {
+        //         sh 'curl -i 172.16.5.4:27017'
+        //         sh './gradlew testE2E'
+        //     }
+        // }
     }
 
 }
