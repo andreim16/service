@@ -5,6 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 
 import ro.unibuc.hello.dto.Greeting;
 import ro.unibuc.hello.exception.EntityNotFoundException;
@@ -18,6 +20,8 @@ public class HelloWorldController {
 
     @GetMapping("/hello-world")
     @ResponseBody
+    @Timed(value = "hello.greeting.time", description = "Time taken to return greeting")
+    @Counted(value = "hello.greeting.count", description = "Times greeting was returned")
     public Greeting sayHello(@RequestParam(name="name", required=false, defaultValue="Stranger") String name) {
         return helloWorldService.hello(name);
     }
